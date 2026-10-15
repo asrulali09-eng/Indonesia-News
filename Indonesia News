@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INDONESIA NEWS - Aktual, Tajam, Terpercaya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { red: '#DC2626', dark: '#111827', gray: '#1F2937' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+
+  <!-- Header Navigasi -->
+  <header class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+        <span class="bg-red-600 text-white font-black text-xl px-2.5 py-1 rounded">ID</span>
+        <h1 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">INDONESIA <span class="text-red-600">NEWS</span></h1>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <!-- Tombol Buka CMS -->
+        <button onclick="toggleCmsModal()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-sm font-semibold rounded-lg hover:bg-red-100 border border-red-200 dark:border-red-900">
+          <i class="fa-solid fa-user-shield"></i>
+          <span id="cmsBtnText">Masuk CMS</span>
+        </button>
+
+        <!-- Toggle Dark Mode -->
+        <button onclick="toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Konten Utama Portal -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold border-l-4 border-red-600 pl-3">Warta Terkini</h2>
+      <span class="text-sm text-gray-500" id="currentDate"></span>
+    </div>
+
+    <!-- Feed Berita -->
+    <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </main>
+
+  <!-- MODAL BACA ARTIKEL -->
+  <div id="readModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 max-w-2xl w-full max-h-[90vh] rounded-xl overflow-y-auto p-6 relative">
+      <button onclick="closeReader()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <span id="readCategory" class="text-xs font-bold text-red-600 uppercase"></span>
+      <h2 id="readTitle" class="text-2xl font-bold mt-1 mb-3"></h2>
+      <p id="readMeta" class="text-xs text-gray-400 mb-4 pb-3 border-b border-gray-100 dark:border-gray-700"></p>
+      <div id="readContent" class="text-base leading-relaxed space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN CMS & DASHBOARD CMS -->
+  <div id="cmsModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 max-w-xl w-full rounded-xl overflow-hidden shadow-2xl">
+      
+      <!-- Panel Form Login (Tampil jika belum login) -->
+      <div id="cmsLoginForm" class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold flex items-center gap-2">
+            <i class="fa-solid fa-lock text-red-600"></i> Autentikasi Redaksi
+          </h3>
+          <button onclick="toggleCmsModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">Masukkan akun pengelola untuk mempublikasikan artikel ke portal.</p>
+        
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold mb-1">Username</label>
+            <input type="text" id="username" required value="admin" class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1">Password</label>
+            <input type="password" id="password" required value="redaksi123" class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm">
+          </div>
+          <button type="submit" class="w-full py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 text-sm">Masuk ke Redaksi</button>
+        </form>
+      </div>
+
+      <!-- Panel Kontrol Redaksi (Tampil sesudah login) -->
+      <div id="cmsDashboard" class="p-6 hidden">
+        <div class="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700 mb-4">
+          <div>
+            <h3 class="text-lg font-bold">Dasbor Redaksi</h3>
+            <span class="text-xs text-emerald-500 font-semibold"><i class="fa-solid fa-circle text-[8px]"></i> Editor Terverifikasi</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="handleLogout()" class="text-xs px-2.5 py-1.5 bg-gray-200 dark:bg-gray-700 rounded hover:bg-red-500 hover:text-white transition">Keluar</button>
+            <button onclick="toggleCmsModal()" class="text-gray-400 hover:text-gray-600 ml-2">&times;</button>
+          </div>
+        </div>
+
+        <form onsubmit="publishNews(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium mb-1">Judul Artikel Berita</label>
+            <input type="text" id="newsTitle" required placeholder="Tuliskan peristiwa utama..." class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-sm border-gray-300 dark:border-gray-600">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium mb-1">Kategori</label>
+              <select id="newsCat" class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-sm border-gray-300 dark:border-gray-600">
+                <option value="Nasional">Nasional</option>
+                <option value="Politik">Politik</option>
+                <option value="Ekonomi">Ekonomi</option>
+                <option value="Hukum">Hukum</option>
+                <option value="Olahraga">Olahraga</option>
+                <option value="Daerah">Daerah</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1">Nama Jurnalis / Wartawan</label>
+              <input type="text" id="newsAuthor" required placeholder="cth: Tim Redaksi" class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-sm border-gray-300 dark:border-gray-600">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">Isi Berita Lengkap</label>
+            <textarea id="newsBody" rows="5" required placeholder="Gunakan susunan piramida terbalik (5W+1H)..." class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-sm border-gray-300 dark:border-gray-600"></textarea>
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-sm transition">Terbitkan Berita Sekarang</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Inisialisasi Data Awal Berita
+    const defaultArticles = [
+      {
+        id: 1,
+        title: "Pemerintah Tingkatkan Integrasi Jalur Logistik Nasional Lintas Pulau",
+        category: "Ekonomi",
+        author: "Tim Redaksi",
+        date: "28 Sep 2026",
+        content: "JAKARTA — Langkah strategis penguatan jaringan logistik antar-wilayah terus dikebut demi menjaga stabilitas pasokan bahan pokok dan menekan disparitas harga barang antar-daerah di seluruh nusantara."
+      },
+      {
+        id: 2,
+        title: "Pemulihan Ruang Terbuka Hijau Jadi Fokus Pembangunan Perkotaan",
+        category: "Nasional",
+        author: "Biro Lingkungan",
+        date: "28 Sep 2026",
+        content: "BANDUNG — Berbagai kota besar mulai merestorasi kawasan bantaran sungai dan jalur hijau guna memperkuat daya serap air tanah serta menekan dampak kenaikan suhu kawasan urban."
+      }
+    ];
+
+    let newsData = JSON.parse(localStorage.getItem('id_news_data')) || defaultArticles;
+    let isEditorLoggedIn = localStorage.getItem('id_editor_logged') === 'true';
+
+    function renderFeed() {
+      const grid = document.getElementById('newsGrid');
+      grid.innerHTML = newsData.map(item => `
+        <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between" onclick="openReader(${item.id})">
+          <div class="p-5">
+            <span class="text-xs font-bold text-red-600 uppercase tracking-wide">${item.category}</span>
+            <h3 class="text-lg font-bold mt-1 mb-2 leading-snug line-clamp-2">${item.title}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">${item.content}</p>
+          </div>
+          <div class="px-5 py-3 border-t border-gray-50 dark:border-gray-700/60 flex justify-between items-center text-xs text-gray-400">
+            <span>Oleh: ${item.author}</span>
+            <span>${item.date}</span>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function openReader(id) {
+      const article = newsData.find(a => a.id === id);
+      if (!article) return;
+      document.getElementById('readCategory').innerText = article.category;
+      document.getElementById('readTitle').innerText = article.title;
+      document.getElementById('readMeta').innerText = `Jurnalis: ${article.author} • ${article.date}`;
+      document.getElementById('readContent').innerHTML = `<p>${article.content}</p>`;
+      document.getElementById('readModal').classList.remove('hidden');
+    }
+
+    function closeReader() {
+      document.getElementById('readModal').classList.add('hidden');
+    }
+
+    // Alur CMS
+    function toggleCmsModal() {
+      const modal = document.getElementById('cmsModal');
+      modal.classList.toggle('hidden');
+      updateCmsView();
+    }
+
+    function updateCmsView() {
+      const loginForm = document.getElementById('cmsLoginForm');
+      const dashboard = document.getElementById('cmsDashboard');
+      const btnText = document.getElementById('cmsBtnText');
+
+      if (isEditorLoggedIn) {
+        loginForm.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        btnText.innerText = "Dasbor CMS";
+      } else {
+        loginForm.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        btnText.innerText = "Masuk CMS";
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+
+      if (u === 'admin' && p === 'redaksi123') {
+        isEditorLoggedIn = true;
+        localStorage.setItem('id_editor_logged', 'true');
+        updateCmsView();
+      } else {
+        alert('Username atau password redaksi tidak cocok!');
+      }
+    }
+
+    function handleLogout() {
+      isEditorLoggedIn = false;
+      localStorage.setItem('id_editor_logged', 'false');
+      updateCmsView();
+    }
+
+    function publishNews(e) {
+      e.preventDefault();
+      const title = document.getElementById('newsTitle').value;
+      const category = document.getElementById('newsCat').value;
+      const author = document.getElementById('newsAuthor').value;
+      const body = document.getElementById('newsBody').value;
+
+      const newArticle = {
+        id: Date.now(),
+        title: title,
+        category: category,
+        author: author,
+        date: "Hari Ini",
+        content: body
+      };
+
+      newsData.unshift(newArticle);
+      localStorage.setItem('id_news_data', JSON.stringify(newsData));
+      renderFeed();
+      toggleCmsModal();
+      e.target.reset();
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Set tanggal hari ini
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    renderFeed();
+    updateCmsView();
+  </script>
+</body>
+</html>
